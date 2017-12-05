@@ -6,6 +6,10 @@ Click in the badge below to open :)
 
 URL: https://mybinder.org/v2/gh/Efsilvaa/MLHub/master
 
+To start your RStudio session (and read your R and Rmd files), click on "new", and at the bottom will be RStudio Session. Click that and you're ready to go!
+
+Or use a R Kernel to read R python notebook (ipynb files).
+
 # RStudio in Binder using a Dockerfile
 
 ## Binder
