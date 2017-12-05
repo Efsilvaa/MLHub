@@ -1,0 +1,223 @@
+---
+title: "Exemplo R Notebook"
+author: "Eduardo F. Silva"
+output: html_notebook
+---
+
+Esse é um exemplo do uso do *R Notebook* (concebido a partir do exemplo de Page Piccinini)
+
+O formato utilizado neste *Notebook* continua sendo [R Markdown](http://rmarkdown.rstudio.com). Quando o código é executado dentro do notebook, os resultados aparecerão abaixo. 
+
+Para executar um *chunk* no *R Studio*, posicione o cursor dentro *chunk* e clique no botão `Run` ou pressione  *Ctrl+Shift+Enter*. 
+
+Para adicionar um novo *chunk* clique no botão *Insert Chunk* ou pressione *Ctrl+Alt+I*.
+
+Quando um notebook é salvo, um arquivo HTML contendo o código e o resultado do seu processamentan será salvo junto com o arquvo ".Rmd" (Use o botão *Preview* ou pressione  *Ctrl+Shift+K* para visualizar o arquivo HTML).
+
+O "preview" renderizará a versão HTML do conteúdo do seu arquivo no R Studio. Consequentemente, diferente do *Knit*, *Preview* não executará nenhum código dos *R Chunks*. Desta forma, o resultado apresentado no arquivo HTML será a saída do chunk no editor do R Studio.
+
+
+# Carregando os pacotes necessários ####
+
+```{r echo=FALSE}
+## LOAD PACKAGES ####
+library(dplyr)
+library(ggplot2)
+```
+
+# Leitura dos dados e uma primera avaliação ####
+```{r}
+# Read in data
+data = read.table("dados/rcourse_lesson1_data.txt", header = T, sep = "\t")
+```
+
+## Verifique o volume dos dados
+```{r}
+dim(data)
+```
+
+## Olhe as primeiras linhas
+```{r}
+head(data)
+```
+
+## Olhe as últimas linhas
+```{r}
+tail(data)
+```
+
+
+## Visualiza os dados desagrupados
+```{r}
+xtabs(~group, data)
+```
+
+
+# Crie subconjuntos de dados (bilíngues)
+```{r}
+data_bl = data %>%
+  # Filter to only include bilinguals
+  filter(group == "bilingual")
+```
+
+
+## Explore os grupos separadamente (dimensão, algumas linhas iniciais e finais)
+```{r}
+dim(data_bl)
+head(data_bl)
+tail(data_bl)
+```
+
+## Número de pontos em cada segmento
+```{r}
+xtabs(~group, data_bl)
+xtabs(~type, data_bl)
+```
+
+
+# Visualize seus dados
+
+## Por grupo
+
+```{r}
+data.plot = ggplot(data, aes(x = group, y = rt)) +
+  # Make the figure a boxplot, fill says to what the color should correspond to,
+  # here it is the same as the x variable
+  geom_boxplot(aes(fill = group)) +
+  # Add a title
+  ggtitle("Tempo de Reação por Grupos") +
+  # Customize the x-axis label
+  xlab("Grupos") +
+  # Customize the y-axis label
+  ylab("Tempo de Reação em msec") +
+  # Remove dark background
+  theme_classic() +
+  # These are extras to make the figure (in my opinion) prettier,
+  # look up each command to learn more
+  theme(text=element_text(size=18), title=element_text(size=18),
+        legend.position="none")
+
+data.plot
+```
+
+
+### caso queira exportar diretamente para pdf
+```{r}
+# Write figure to a pdf in the 'figures' folder
+pdf("imagens/data.pdf")
+# Call plot
+data.plot
+# Close pdf call
+dev.off()
+
+```
+
+
+
+# Visualisando todos os grupos/tipos
+
+```{r}
+data_bl.plot = ggplot(data_bl, aes(x = type, y = rt)) +
+  # Make the figure a boxplot, fill says to what the color should correspond to,
+  # here it is NOT the same as the x variable, this is how you get grouped boxplots
+  geom_boxplot(aes(fill = type)) +
+  # Add a title
+  ggtitle("Tempo de Reação dos bilíngues por nível de Proficiencia") +
+  # Customize the x-axis label
+  xlab("Proficiencia na segunda língua") +
+  # Customize the y-axis label
+  ylab("Tempo de Reação em msec") +
+  # Remove dark background
+  theme_classic() +
+  # These are extras to make the figure (in my opinion) prettier,
+  # look up each command to learn more
+  theme(text=element_text(size=18), title=element_text(size=18),
+        legend.position="none")
+data_bl.plot
+```
+
+
+
+## caso queira exportar diretamente para pdf
+```{r}
+# Write figure to a pdf in the 'figures' folder
+pdf("imagens/data_bl.pdf")
+# Call plot
+data_bl.plot
+# Close pdf call
+dev.off()
+```
+
+
+# Within bilinguals by proficiency with monolinguals in plot
+
+```{r}
+data_blwml.plot = ggplot(data, aes(x = group, y = rt)) +
+  # Make the figure a boxplot, fill says to what the color should correspond to,
+  # here it is NOT the same as the x variable, this is how you get grouped boxplots
+  geom_boxplot(aes(fill = type)) +
+  # Add a title
+  ggtitle("Tempo de Reação ") +
+  # Customize the x-axis label
+  xlab("Grupos") +
+  # Customize the y-axis label
+  ylab("Tempo de Reação em msec") +
+  # Remove dark background
+  theme_classic() +
+  # These are extras to make the figure (in my opinion) prettier,
+  # look up each command to learn more
+  theme(text=element_text(size=18), title=element_text(size=18),
+        legend.position="none")
+
+data_blwml.plot
+```
+
+## caso queira exportar diretamente para pdf
+```{r}
+# Write figure to a pdf in the 'figures' folder
+pdf("figures/data_blwml.pdf")
+# Call plot
+data_blwml.plot
+# Close pdf call
+dev.off()
+```
+
+
+
+
+# Registre Estatísticas Descrivas ####
+```{r}
+# Summarise data
+data_sum = data %>%
+  # Say what you want to summarise by, here it's 'group'
+  group_by(group) %>%
+  # Get mean, standard deviation, maximum, and minimum reaction times for each group
+  summarise(rt_mean = mean(rt),
+            rt_sd = sd(rt),
+            rt_max = max(rt),
+            rt_min = min(rt)) %>%
+  # Ungroup the data so future analyses can be done on the data frame as a whole,
+  # not by group
+  ungroup()
+
+data_sum
+```
+
+
+# "Summarise" dados dos bilíngues
+```{r}
+data_bl_sum = data_bl %>%
+  # Say what you want to summarise by, here it's type
+  group_by(type) %>%
+  # Get mean, standard deviation, maximum, and minimum reaction times for each type
+  summarise(rt_mean = mean(rt),
+            rt_sd = sd(rt),
+            rt_max = max(rt),
+            rt_min = min(rt)) %>%
+  # Ungroup the data so future analyses can be done on the data frame as a whole,
+  # not by type
+  ungroup()
+
+data_bl_sum
+```
+
